@@ -2,31 +2,30 @@
 
 #include <unordered_map>
 #include <boost/asio.hpp>
+
 #include "Player.h"
 #include "PlayerPhy.h"
-#include "../shared/PlayerInput.h"
+#include "SnakeNetwork.h"
 
 class SnakeGame
 {
 public:
     const int MAX_PLAYERS = 100;
 
-    SnakeGame();
-    void start();
+    SnakeGame(SnakeNetwork &network, boost::asio::io_context &io_context);
 
 private:
-    boost::asio::io_context io_;
-
     // joueursID -> Player
     std::unordered_map<int, Player> players_;
     std::vector<PlayerPhy> playersPhy_;
     
-    
-    std::mutex inputs_mutex_;
-    std::vector<PlayerInput> curentInput_;
-    std::vector<PlayerInput> pendingInputs_;
-
     std::chrono::milliseconds tickLength_;
+    
+    std::mutex eventsMutex_;
+    std::vector<GameEvent> pendingEvents_;
+    std::vector<GameEvent> curentEvents_;
+
+    void start(boost::asio::io_context &io_context);
 
     void gameTick(boost::asio::steady_timer &timeLeft);
 
@@ -36,7 +35,9 @@ private:
     void calcState();
     void broadcastState();
 
-    void inputProcess();
-    void collectInput();
-    void applyInput();
+    void eventsProcess();
+    void collectEvents();
+    void applyEvents();
+
+    void safeAddEvent(const GameEvent& event);
 };

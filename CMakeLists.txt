@@ -1,22 +1,34 @@
 cmake_minimum_required(VERSION 4.0)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(snake)
 
 find_package(Boost REQUIRED)
 
-add_executable(snake_cli src/client/main.cpp)
-add_executable(snake_serv
-    src/server/main.cpp
-    src/server/SnakeGame.h
-    src/server/SnakeGame.cpp
-    src/server/Player.h
-    src/server/Player.cpp
-    src/server/PlayerPhy.h
-    src/server/PlayerPhy.cpp
 
-    src/shared/PlayerInput.h
-    src/shared/Vector2D.h
+# CLIENT -----------------------------------
+
+file(GLOB_RECURSE CLIENT_SOURCES CONFIGURE_DEPENDS
+    "src/client/*.cpp"
+    "src/client/*.h"
+    "src/shared/*.cpp"
+    "src/shared/*.h"
 )
+add_executable(snake_cli ${CLIENT_SOURCES})
+
+
+# SERVER -----------------------------------
+
+file(GLOB_RECURSE SERVER_SOURCES CONFIGURE_DEPENDS
+    "src/server/*.cpp"
+    "src/server/*.h"
+    "src/shared/*.cpp"
+    "src/shared/*.h"
+)
+add_executable(snake_serv ${SERVER_SOURCES})
+
+
 
 
 

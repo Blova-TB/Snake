@@ -3,27 +3,30 @@
 #include <iostream>
 #include <boost/asio.hpp>
 
-SnakeGame::SnakeGame()
-    : io_(),
-      tickLength_(std::chrono::milliseconds(100))
+SnakeGame::SnakeGame(SnakeNetwork &network, boost::asio::io_context &io_context)
+    : tickLength_(std::chrono::milliseconds(100))
 {
+    network.on_input_received = [this](const GameEvent& event)
+    {
+        safeAddEvent(event);
+    };
     players_.reserve(MAX_PLAYERS);
     playersPhy_.reserve(MAX_PLAYERS);
     std::cout << "Hello, World! I'm Game" << std::endl;
+
+    start(io_context);
 }
 
-void SnakeGame::start()
+void SnakeGame::start(boost::asio::io_context &io_context)
 {
     std::cout << "gameTick() started" << std::endl;
 
-    boost::asio::steady_timer t(io_, std::chrono::milliseconds(0));
+    boost::asio::steady_timer t(io_context, std::chrono::milliseconds(0));
     t.async_wait([this, &t](const boost::system::error_code &error)
                  {
         if (!error) {
             this->gameTick(t);
         } });
-
-    io_.run();
 }
 
 void SnakeGame::gameTick(boost::asio::steady_timer &t)
@@ -38,7 +41,7 @@ void SnakeGame::gameTick(boost::asio::steady_timer &t)
 
     stateProcess();
 
-    inputProcess();
+    eventsProcess();
 
     t.async_wait([this, &t](const boost::system::error_code &error)
                  {
@@ -71,22 +74,29 @@ void SnakeGame::broadcastState()
     // TODO
 }
 
-void SnakeGame::inputProcess()
+void SnakeGame::eventsProcess()
 {
-    collectInput();
-    applyInput();
+    collectEvents();
+    applyEvents();
 }
 
-void SnakeGame::collectInput()
+void SnakeGame::collectEvents()
 {
-    std::lock_guard<std::mutex> lock(inputs_mutex_);
-    curentInput_ = pendingInputs_;
-    pendingInputs_.clear();
+    std::lock_guard<std::mutex> lock(eventsMutex_);
+    std::swap(curentEvents_, pendingEvents_);
+    pendingEvents_.clear();
 }
 
-void SnakeGame::applyInput()
+void SnakeGame::safeAddEvent(const GameEvent& event)
 {
-    for(auto &input : curentInput_){
-        // TODO 
+    std::lock_guard<std::mutex> lock(eventsMutex_);
+    pendingEvents_.push_back(event);
+}
+
+void SnakeGame::applyEvents()
+{
+    for (auto &input : curentEvents_)
+    {
+        std::cout << "Event !";
     }
 }

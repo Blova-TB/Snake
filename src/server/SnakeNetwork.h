@@ -6,12 +6,13 @@
 
 #include "../shared/Model.h"
 
+
 class SnakeNetwork
 {
 public:
     SnakeNetwork(boost::asio::io_context &io_context);
 
-    std::function<void(const GameEvent&)> on_input_received;
+    std::function<void(const GamePacket&)> on_input_received;
 
 private:
     void start_receive();

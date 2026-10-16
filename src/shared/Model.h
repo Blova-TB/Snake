@@ -98,10 +98,10 @@ void write_to(std::vector<uint8_t>& buf, const GamePacket& packet) {
     }, packet.payload);
 }
 
-GamePacket read_packet(const std::vector<uint8_t>& raw_data) {
-    ByteBuffer buf{raw_data, 0};
+GamePacket read_packet(const uint8_t* raw_data, size_t length) {
+    ByteBuffer buf{raw_data, length, 0};
     GamePacket packet;
-    
+
     read_from(buf, packet.player_id);
     
     uint8_t tag;

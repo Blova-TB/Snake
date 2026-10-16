@@ -24,8 +24,7 @@ void SnakeNetwork::start_receive()
         });
 }
 
-void SnakeNetwork::handle_receive(const boost::system::error_code &error,
-                                  std::size_t bytes_transferred)
+void SnakeNetwork::handle_receive(const boost::system::error_code &error, std::size_t bytes_transferred)
 {
     if (error)
     {
@@ -33,53 +32,37 @@ void SnakeNetwork::handle_receive(const boost::system::error_code &error,
         return;
     }
 
-    if (bytes_transferred < sizeof(PacketHeader))
+    try
     {
-        std::cerr << "error : wrong Header packet size" << std::endl;
-        return;
-    }
+        GamePacket packet = read_packet(recv_buffer_.data(), bytes_transferred);
 
-    PacketHeader *msgHeader = reinterpret_cast<PacketHeader *>(recv_buffer_.data());
+        if (auto optionalId = processPlayerId())
+        {
+            if (packet.player_id = 0)
+            {
+                packet.player_id = *optionalId;
+            }
+            else
+            {
+                if (packet.player_id != *optionalId)
+                {
+                    throw std::runtime_error("unknonwn player id");
+                }
+            }
+        }
+        else
+        {
+            std::cerr << "Err : ID not found and can't create.\n";
+        }
 
-    size_t totalSize = sizeof(PacketHeader) + sizeof(msgHeader->type);
-
-    uint8_t *msgBody = recv_buffer_.data() + sizeof(PacketHeader);
-
-    GameEvent event;
-    
-    if (auto optionalId = processPlayerId()) 
-    {
-        event.playerId = *optionalId;
-    } 
-    else 
-    {
-        std::cerr << "Erreur : Impossible de créer un ID.\n";
+        if (on_input_received)
+        {
+            on_input_received(packet);
+        }
     }
-
-    switch (msgHeader->type)
+    catch (const std::exception &e)
     {
-    case MsgType::Connect:
-    {
-        MsgConnect *msg = reinterpret_cast<MsgConnect *>(msgBody);
-        event.payload = *msg;
-        break;
-    }
-    case MsgType::Disconnect:
-    {
-        MsgDisconnect *msg = reinterpret_cast<MsgDisconnect *>(msgBody);
-        event.payload = *msg;
-        break;
-    }
-    case MsgType::Input:
-    {
-        MsgInput *msg = reinterpret_cast<MsgInput *>(msgBody);
-        event.payload = *msg;
-    }
-    }
-
-    if (on_input_received)
-    {
-        on_input_received(event);
+        std::cerr << "Err : " << e.what() << std::endl;
     }
 }
 
@@ -87,6 +70,7 @@ void SnakeNetwork::handle_send(std::shared_ptr<std::string> /*message*/,
                                const boost::system::error_code & /*error*/,
                                std::size_t /*bytes_transferred*/)
 {
+    //TODO
 }
 
 std::optional<uint32_t> SnakeNetwork::processPlayerId()

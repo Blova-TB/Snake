@@ -10,9 +10,10 @@
 
 struct ByteBuffer
 {
-    const std::vector<uint8_t> &data;
+    const uint8_t* data;
+    size_t size;
     size_t offset = 0;
-    bool is_left_enough(size_t size) const { return offset + size <= data.size(); }
+    bool is_left_enough(size_t len) const { return offset + len <= size; }
 };
 
 // int
@@ -29,7 +30,7 @@ void read_from(ByteBuffer &buf, T &val)
 {
     if (!buf.is_left_enough(sizeof(T)))
         throw std::runtime_error("Buffer underflow");
-    std::memcpy(&val, buf.data.data() + buf.offset, sizeof(T));
+    std::memcpy(&val, buf.data + buf.offset, sizeof(T));
     buf.offset += sizeof(T);
     val = boost::endian::little_to_native(val);
 }
@@ -47,7 +48,7 @@ void read_from(ByteBuffer &buf, std::string &str)
     read_from(buf, len);
     if (!buf.is_left_enough(len))
         throw std::runtime_error("Buffer underflow on string");
-    str.assign(buf.data.begin() + buf.offset, buf.data.begin() + buf.offset + len);
+    str.assign(buf.data + buf.offset, buf.data + buf.offset + len);
     buf.offset += len;
 }
 

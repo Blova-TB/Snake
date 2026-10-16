@@ -3,7 +3,6 @@
 #include <cstdint>
 #include "PacketTemplate.h"
 
-// --------------------------------------- Client to Server ---------------------------------------
 
 enum class MsgType : uint8_t
 {
@@ -22,6 +21,8 @@ enum class InputFlags : uint8_t
     Right = 1 << 3,
     Action = 1 << 4
 };
+
+// ----------------------------------------------------
 
 struct InputRecord
 {
@@ -81,52 +82,50 @@ void write_to(std::vector<uint8_t> &buf, const PktLogOut &pk)
 
 using PacketPayload = std::variant<PktLogIn, PktLogOut, PktInputs>;
 
-struct GamePacket
-{
+struct GamePacket {
     uint32_t player_id;
-    uint8_t tag;
     PacketPayload payload;
-
-    std::vector<uint8_t> to_bytes() const
-    {
-        std::vector<uint8_t> buf;
-
-        write_to(buf, player_id);
-        write_to(buf, tag);
-
-        std::visit([&buf](const auto& pkt) { 
-            write_to(buf, pkt); 
-        }, payload);
-
-        return buf;
-    }
-
-    static GamePacket try_from_bytes(const std::vector<uint8_t> &raw_data)
-    {
-        ByteBuffer buf{raw_data, 0};
-
-        GamePacket packet;
-        // TODO
-        // packet.player_id = read_from<PlayerId>(buf);
-        // packet.tag = read_from<uint8_t>(buf);
-
-        // switch (packet.tag)
-        // {
-        // case PktLogIn::TAG:
-        //     packet.payload = PktLogIn::read(buf);
-        //     break;
-        // case PktLogOut::TAG:
-        //     packet.payload = PktLogOut::read(buf);
-        //     break;
-        // case PktInputs::TAG:
-        //     packet.payload = PktInputs::read(buf);
-        //     break;
-        // case PktMessage::TAG:
-        //     packet.payload = PktMessage::read(buf);
-        //     break;
-        // default:
-        //     throw std::runtime_error("Tag de packet inconnu !");
-        // }
-        // return packet;
-    }
 };
+
+void write_to(std::vector<uint8_t>& buf, const GamePacket& packet) {
+    
+    write_to(buf, packet.player_id);
+    
+    std::visit([&buf](const auto& pkt) {
+        using PktType = std::decay_t<decltype(pkt)>; 
+        write_to(buf, PktType::TAG); 
+        write_to(buf, pkt);
+    }, packet.payload);
+}
+
+GamePacket read_packet(const std::vector<uint8_t>& raw_data) {
+    ByteBuffer buf{raw_data, 0};
+    GamePacket packet;
+    
+    read_from(buf, packet.player_id);
+    
+    uint8_t tag;
+    read_from(buf, tag);
+
+    switch (tag) {
+        case PktLogIn::TAG: {
+            auto& pkt = packet.payload.emplace<PktLogIn>();
+            read_from(buf, pkt);
+            break;
+        }
+        case PktInputs::TAG: {
+            auto& pkt = packet.payload.emplace<PktInputs>();
+            read_from(buf, pkt);
+            break;
+        }
+        case PktLogOut::TAG: {
+            auto& pkt = packet.payload.emplace<PktLogOut>();
+            read_from(buf, pkt);
+            break;
+        }
+        default: 
+            throw std::runtime_error("unknonwn pkt tag");
+    }
+    
+    return packet;
+}

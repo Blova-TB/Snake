@@ -41,12 +41,7 @@ void SnakeNetwork::handle_receive(const boost::system::error_code &error,
 
     PacketHeader *msgHeader = reinterpret_cast<PacketHeader *>(recv_buffer_.data());
 
-    size_t totalSize = sizeof(PacketHeader) + msgHeader->size;
-    if (bytes_transferred != totalSize)
-    {
-        std::cerr << "error : wrong packet size" << std::endl;
-        return;
-    }
+    size_t totalSize = sizeof(PacketHeader) + sizeof(msgHeader->type);
 
     uint8_t *msgBody = recv_buffer_.data() + sizeof(PacketHeader);
 

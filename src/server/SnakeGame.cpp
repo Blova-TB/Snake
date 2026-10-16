@@ -1,12 +1,13 @@
 #include "SnakeGame.h"
 
 #include <iostream>
+#include <variant>
 #include <boost/asio.hpp>
 
 SnakeGame::SnakeGame(SnakeNetwork &network, boost::asio::io_context &io_context)
     : tickLength_(std::chrono::milliseconds(100))
 {
-    network.on_input_received = [this](const GameEvent& event)
+    network.on_input_received = [this](const GameEvent &event)
     {
         safeAddEvent(event);
     };
@@ -87,7 +88,7 @@ void SnakeGame::collectEvents()
     pendingEvents_.clear();
 }
 
-void SnakeGame::safeAddEvent(const GameEvent& event)
+void SnakeGame::safeAddEvent(const GameEvent &event)
 {
     std::lock_guard<std::mutex> lock(eventsMutex_);
     pendingEvents_.push_back(event);
@@ -95,8 +96,24 @@ void SnakeGame::safeAddEvent(const GameEvent& event)
 
 void SnakeGame::applyEvents()
 {
-    for (auto &input : curentEvents_)
+    for (auto &event : curentEvents_)
     {
-        std::cout << "Event !";
+        if (std::holds_alternative<MsgConnect>(event.payload))
+        {
+            // TODO
+        }
+        else if (std::holds_alternative<MsgDisconnect>(event.payload))
+        {
+            // TODO
+        }
+        else if (std::holds_alternative<MsgInput>(event.payload))
+        {
+            // TODO
+        }
+        else
+        {
+            std::cerr << "Unknown event.payload in SnakeGame::applyEvents()" << std::endl;
+        }
+        std::cout << "Event !" << std::endl;
     }
 }

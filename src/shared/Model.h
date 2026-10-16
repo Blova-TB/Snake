@@ -128,4 +128,27 @@ GamePacket read_packet(const std::vector<uint8_t>& raw_data) {
     }
     
     return packet;
+
+    // possible solution to avoid the switch
+    // TODO
+
+    // if (!parse_payload(tag, buf, packet.payload)) {
+    //     throw std::runtime_error("Unknown pkt tag");
+    // }
+    // return packet;
 }
+
+// template <typename Variant, size_t I = 0>
+// bool parse_payload(uint8_t tag, ByteBuffer& buf, Variant& payload) {
+//     if constexpr (I < std::variant_size_v<Variant>) {
+
+//         using PktType = std::variant_alternative_t<I, Variant>;
+//         if (tag == PktType::TAG) {
+//             auto& pkt = payload.template emplace<PktType>();
+//             read_from(buf, pkt);
+//             return true;
+//         }
+//         return parse_payload<Variant, I + 1>(tag, buf, payload);
+//     }
+//     return false; 
+// }

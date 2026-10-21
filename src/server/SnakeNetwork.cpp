@@ -38,13 +38,13 @@ void SnakeNetwork::handle_receive(const boost::system::error_code &error, std::s
 
         if (auto optionalId = processPlayerId())
         {
-            if (packet.player_id = 0)
+            if (packet.playerId = 0)
             {
-                packet.player_id = *optionalId;
+                packet.playerId = *optionalId;
             }
             else
             {
-                if (packet.player_id != *optionalId)
+                if (packet.playerId != *optionalId)
                 {
                     throw std::runtime_error("unknonwn player id");
                 }

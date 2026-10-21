@@ -4,10 +4,6 @@
 #include <iostream>
 #include <boost/asio.hpp>
 
-
-// void updateGame(boost::asio::steady_timer& t);
-
-
 int main()
 {
     std::cout << "Hello, World! I'm Server" << std::endl;

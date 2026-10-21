@@ -1,11 +1,11 @@
 #pragma once
 
-#include <unordered_map>
-#include <boost/asio.hpp>
-
 #include "Player.h"
 #include "PlayerPhy.h"
 #include "SnakeNetwork.h"
+
+#include <unordered_map>
+#include <boost/asio.hpp>
 
 class SnakeGame
 {
@@ -22,8 +22,8 @@ private:
     std::chrono::milliseconds tickLength_;
     
     std::mutex eventsMutex_;
-    std::vector<GameEvent> pendingEvents_;
-    std::vector<GameEvent> curentEvents_;
+    std::vector<GamePacket> pendingEvents_;
+    std::vector<GamePacket> curentEvents_;
 
     void start(boost::asio::io_context &io_context);
 
@@ -39,5 +39,5 @@ private:
     void collectEvents();
     void applyEvents();
 
-    void safeAddEvent(const GameEvent& event);
+    void safeAddEvent(const GamePacket& event);
 };

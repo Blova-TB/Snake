@@ -37,13 +37,13 @@ void read_from(ByteBuffer &buf, T &val)
 }
 
 // les str
-void write_to(std::vector<uint8_t> &buf, const std::string &str)
+void inline write_to(std::vector<uint8_t> &buf, const std::string &str)
 {
     write_to<uint32_t>(buf, static_cast<uint32_t>(str.size()));
     buf.insert(buf.end(), str.begin(), str.end());
 }
 
-void read_from(ByteBuffer &buf, std::string &str)
+void inline read_from(ByteBuffer &buf, std::string &str)
 {
     uint32_t len;
     read_from(buf, len);

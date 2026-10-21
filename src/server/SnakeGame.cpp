@@ -1,4 +1,5 @@
 #include "SnakeGame.h"
+#include "../shared/ModelServer.h"
 
 #include <iostream>
 #include <variant>
@@ -7,7 +8,7 @@
 SnakeGame::SnakeGame(SnakeNetwork &network, boost::asio::io_context &io_context)
     : tickLength_(std::chrono::milliseconds(100))
 {
-    network.on_input_received = [this](const GameEvent &event)
+    network.on_input_received = [this](const GamePacket &event)
     {
         safeAddEvent(event);
     };
@@ -88,7 +89,7 @@ void SnakeGame::collectEvents()
     pendingEvents_.clear();
 }
 
-void SnakeGame::safeAddEvent(const GameEvent &event)
+void SnakeGame::safeAddEvent(const GamePacket &event)
 {
     std::lock_guard<std::mutex> lock(eventsMutex_);
     pendingEvents_.push_back(event);
@@ -98,15 +99,15 @@ void SnakeGame::applyEvents()
 {
     for (auto &event : curentEvents_)
     {
-        if (std::holds_alternative<MsgConnect>(event.payload))
+        if (std::holds_alternative<PktLogIn>(event.payload))
         {
             // TODO
         }
-        else if (std::holds_alternative<MsgDisconnect>(event.payload))
+        else if (std::holds_alternative<PktLogOut>(event.payload))
         {
             // TODO
         }
-        else if (std::holds_alternative<MsgInput>(event.payload))
+        else if (std::holds_alternative<PktInputs>(event.payload))
         {
             // TODO
         }

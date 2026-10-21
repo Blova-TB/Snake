@@ -1,9 +1,6 @@
 #pragma once
 
 #include <string>
-#include <vector>
-
-#include "../shared/Vector2D.h"
 
 class Player
 {

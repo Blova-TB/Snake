@@ -13,7 +13,7 @@ struct GamePacket
     MessagePayload payload;
 };
 
-void write_to(std::vector<uint8_t> &buf, const GamePacket &packet)
+void inline write_to(std::vector<uint8_t> &buf, const GamePacket &packet)
 {
 
     write_to(buf, packet.playerId);
@@ -25,7 +25,7 @@ void write_to(std::vector<uint8_t> &buf, const GamePacket &packet)
         write_to(buf, pkt); }, packet.payload);
 }
 
-GamePacket read_packet(const uint8_t *raw_data, size_t length)
+GamePacket inline read_packet(const uint8_t *raw_data, size_t length)
 {
     ByteBuffer buf{raw_data, length, 0};
     GamePacket packet;

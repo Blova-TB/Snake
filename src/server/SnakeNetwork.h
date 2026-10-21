@@ -1,11 +1,10 @@
 #pragma once
 
+#include "../shared/LidSerialization.h"
+
 #include <boost/asio.hpp>
 #include <unordered_map>
 #include <optional>
-
-#include "../shared/Model.h"
-
 
 class SnakeNetwork
 {

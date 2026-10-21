@@ -1,6 +1,7 @@
 {
   "dependencies": [
-    "boost-asio",
-    "boost-serialization"
+    "boost-pfr",
+    "boost-endian",
+    "boost-asio"
   ]
 }

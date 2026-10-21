@@ -1,16 +1,17 @@
+#pragma once
+
 #include <vector>
 #include <string>
 #include <cstdint>
 #include <cstring>
 #include <stdexcept>
-#include <variant>
-#include <memory>
-#include <iostream>
 #include <boost/endian/conversion.hpp>
+#include <type_traits>
+#include <boost/pfr.hpp>
 
 struct ByteBuffer
 {
-    const uint8_t* data;
+    const uint8_t *data;
     size_t size;
     size_t offset = 0;
     bool is_left_enough(size_t len) const { return offset + len <= size; }
@@ -74,4 +75,18 @@ void read_from(ByteBuffer &buf, std::vector<T> vec)
     {
         read_from(buf, t);
     }
+}
+
+template <typename T>
+std::enable_if_t<std::is_aggregate_v<T>> write_to(std::vector<uint8_t> &buf, const T &aggregate)
+{
+    boost::pfr::for_each_field(aggregate, [&](const auto &field)
+                               { write_to(buf, field); });
+}
+
+template <typename T>
+std::enable_if_t<std::is_aggregate_v<T>> read_from(ByteBuffer &buf, T &aggregate)
+{
+    boost::pfr::for_each_field(aggregate, [&](auto &field)
+                               { read_from(buf, field); });
 }

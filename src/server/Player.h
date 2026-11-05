@@ -12,7 +12,7 @@ private:
     // ...
 
 public:
-    Player(int id, const std::string &name);
+    Player(const int id, const std::string &name);
     int getId() const;
     std::string getName() const;
     int getScore() const;

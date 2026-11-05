@@ -55,9 +55,9 @@ void SnakeNetwork::handle_receive(const boost::system::error_code &error, std::s
             std::cerr << "Err : ID not found and can't create.\n";
         }
 
-        if (on_input_received)
+        if (on_pkt_received)
         {
-            on_input_received(packet);
+            on_pkt_received(packet);
         }
     }
     catch (const std::exception &e)

@@ -22,6 +22,15 @@ enum class InputFlags : uint8_t
     Action = 1 << 4
 };
 
+inline bool inputContain(uint8_t input, InputFlags flag){
+
+    if (flag == InputFlags::None) {
+        return input == 0;
+    }
+    
+    return (input & static_cast<uint8_t>(flag)) != 0;
+}
+
 // ----------------------------------------------------
 
 struct InputRecord

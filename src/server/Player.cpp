@@ -1,6 +1,6 @@
 #include "Player.h"
 
-Player::Player(int id, const std::string &name) : id(id), name(name), score(0), health(100) {}
+Player::Player(const int id, const std::string &name) : id(id), name(name), score(0), health(100) {}
 
 int Player::getId() const
 {

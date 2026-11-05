@@ -8,11 +8,12 @@
 SnakeGame::SnakeGame(SnakeNetwork &network, boost::asio::io_context &io_context)
     : tickLength_(std::chrono::milliseconds(100))
 {
-    network.on_input_received = [this](const GamePacket &event)
+    network.on_pkt_received = [this](const GamePacket &event)
     {
         safeAddEvent(event);
     };
     players_.reserve(MAX_PLAYERS);
+    playersIdToPlayersPhyIndx_.reserve(MAX_PLAYERS);
     playersPhy_.reserve(MAX_PLAYERS);
     std::cout << "Hello, World! I'm Game" << std::endl;
 
@@ -68,7 +69,10 @@ void SnakeGame::stateProcess()
 
 void SnakeGame::calcState()
 {
-    // TODO
+    for (auto ply : playersPhy_)
+    {
+        std::cout << ply.getPosition().toString() << std::endl;
+    }
 }
 
 void SnakeGame::broadcastState()
@@ -99,22 +103,85 @@ void SnakeGame::applyEvents()
 {
     for (auto &event : curentEvents_)
     {
-        if (std::holds_alternative<PktLogIn>(event.payload))
-        {
-            // TODO
-        }
-        else if (std::holds_alternative<PktLogOut>(event.payload))
-        {
-            // TODO
-        }
-        else if (std::holds_alternative<PktInputs>(event.payload))
-        {
-            // TODO
-        }
-        else
-        {
-            std::cerr << "Unknown event.payload in SnakeGame::applyEvents()" << std::endl;
-        }
+        event.playerId;
+
+        std::visit([this, &event](const auto &pkt)
+                   {
+            using PktType = std::decay_t<decltype(pkt)>;
+
+            if constexpr (std::is_same_v<PktType, PktLogIn>)
+            {
+                handleLogIn(event.playerId, pkt);
+            }
+            else if constexpr (std::is_same_v<PktType, PktLogOut>)
+            {
+                handleLogOut(event.playerId, pkt);
+            }
+            else if constexpr (std::is_same_v<PktType, PktInputs>)
+            {
+                handleInputs(event.playerId, pkt);
+            }
+            else
+            {
+                std::cerr << "Unknown event.payload" << std::endl;
+            } }, event.payload);
+
         std::cout << "Event !" << std::endl;
     }
+}
+
+void SnakeGame::handleLogIn(const int playerId, const PktLogIn &pkt)
+{
+    players_.insert(std::pair(
+        playerId,
+        Player(playerId, pkt.pseudo)));
+
+    playersIdToPlayersPhyIndx_.insert(std::pair(playerId,playersPhy_.size()));
+    
+    playersPhy_.push_back(
+        PlayerPhy(playerId)
+    );
+}
+
+void SnakeGame::handleLogOut(const int playerId, const PktLogOut &pkt)
+{
+    players_.erase(playerId);
+    int index_to_remove = playersIdToPlayersPhyIndx_[playerId];
+    if (index_to_remove < playersPhy_.size() - 1) {
+        playersPhy_[index_to_remove] = playersPhy_.back();
+    }
+    playersPhy_.pop_back();
+
+    playersIdToPlayersPhyIndx_.erase(playerId);
+    playersIdToPlayersPhyIndx_.insert_or_assign(playersPhy_[index_to_remove].getId(),index_to_remove);
+}
+
+void SnakeGame::handleInputs(const int playerId, const PktInputs &pkt)
+{
+    int index = playersIdToPlayersPhyIndx_[playerId];
+    uint8_t input = (pkt.inputs[0].action_mask);
+
+    Vector2D newSpeed(0,0);
+
+    if(!inputContain(input, InputFlags::None)){
+        if (inputContain(input, InputFlags::Up)){
+            newSpeed.y -= 1; 
+        }
+        if (inputContain(input, InputFlags::Down)){
+            newSpeed.y += 1; 
+        }
+        if (inputContain(input, InputFlags::Right)){
+            newSpeed.x += 1; 
+        }
+        if (inputContain(input, InputFlags::Left)){
+            newSpeed.x -= 1; 
+        }
+    }
+    
+    newSpeed.norm();
+    playersPhy_[index].setVitesse(newSpeed);
+}
+
+void SnakeGame::createNewPlayer()
+{
 }

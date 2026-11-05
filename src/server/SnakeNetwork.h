@@ -11,7 +11,7 @@ class SnakeNetwork
 public:
     SnakeNetwork(boost::asio::io_context &io_context);
 
-    std::function<void(const GamePacket&)> on_input_received;
+    std::function<void(const GamePacket&)> on_pkt_received;
 
 private:
     void start_receive();

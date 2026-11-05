@@ -6,6 +6,7 @@
 
 #include <unordered_map>
 #include <boost/asio.hpp>
+#include <vector>
 
 class SnakeGame
 {
@@ -17,6 +18,8 @@ public:
 private:
     // joueursID -> Player
     std::unordered_map<int, Player> players_;
+
+    std::unordered_map<int,int> playersIdToPlayersPhyIndx_;
     std::vector<PlayerPhy> playersPhy_;
     
     std::chrono::milliseconds tickLength_;
@@ -39,5 +42,11 @@ private:
     void collectEvents();
     void applyEvents();
 
+    void handleLogIn(const int playerId, const PktLogIn& pkt);
+    void handleLogOut(const int playerId, const PktLogOut& pkt);
+    void handleInputs(const int playerId, const PktInputs& pkt);
+
     void safeAddEvent(const GamePacket& event);
+
+    void createNewPlayer();
 };

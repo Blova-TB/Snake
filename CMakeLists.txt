@@ -4,7 +4,18 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(snake)
 
+
+# DEPENDANCE --------------------------------
+
 find_package(Boost REQUIRED)
+
+include(FetchContent)
+FetchContent_Declare(
+    SFML
+    GIT_REPOSITORY https://github.com/SFML/SFML.git
+    GIT_TAG 2.6.1
+)
+FetchContent_MakeAvailable(SFML)
 
 
 # CLIENT -----------------------------------
@@ -38,5 +49,18 @@ if(WIN32)
 endif()
 
 
-target_link_libraries(snake_cli PRIVATE Boost::headers)
+target_link_libraries(snake_cli PRIVATE Boost::headers sfml-graphics)
 target_link_libraries(snake_serv PRIVATE Boost::headers)
+
+
+
+# move dll sfml near .exe
+if(WIN32)
+    add_custom_command(TARGET snake_cli POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:sfml-system>
+        $<TARGET_FILE:sfml-window>
+        $<TARGET_FILE:sfml-graphics>
+        $<TARGET_FILE_DIR:snake_cli>
+    )
+endif()

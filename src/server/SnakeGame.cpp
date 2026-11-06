@@ -181,7 +181,3 @@ void SnakeGame::handleInputs(const int playerId, const PktInputs &pkt)
     newSpeed.norm();
     playersPhy_[index].setVitesse(newSpeed);
 }
-
-void SnakeGame::createNewPlayer()
-{
-}

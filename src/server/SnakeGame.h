@@ -48,5 +48,4 @@ private:
 
     void safeAddEvent(const GamePacket& event);
 
-    void createNewPlayer();
 };

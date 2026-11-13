@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../shared/LidSerialization.h"
+#include "../shared/SharedProtocol.h"
 
 #include <boost/asio.hpp>
 #include <unordered_map>
@@ -11,7 +11,7 @@ class SnakeNetwork
 public:
     SnakeNetwork(boost::asio::io_context &io_context);
 
-    std::function<void(const GamePacket&)> on_pkt_received;
+    std::function<void(const ClientToServerPacket&)> on_pkt_received;
 
 private:
     void start_receive();

@@ -65,7 +65,7 @@ void write_to(std::vector<uint8_t> &buf, const std::vector<T> &vec)
 }
 
 template <typename T>
-void read_from(ByteBuffer &buf, std::vector<T> vec)
+void read_from(ByteBuffer &buf, std::vector<T>& vec)
 {
     uint32_t len;
     read_from(buf, len);

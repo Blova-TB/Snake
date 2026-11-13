@@ -34,7 +34,7 @@ void SnakeNetwork::handle_receive(const boost::system::error_code &error, std::s
 
     try
     {
-        GamePacket packet = read_packet(recv_buffer_.data(), bytes_transferred);
+        ClientToServerPacket packet = read_packet<ClientToServerPayload>(recv_buffer_.data(), bytes_transferred);
 
         if (auto optionalId = processPlayerId())
         {

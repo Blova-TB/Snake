@@ -11,7 +11,6 @@
 class SnakeGame
 {
 public:
-    const int MAX_PLAYERS = 100;
 
     SnakeGame(SnakeNetwork &network, boost::asio::io_context &io_context);
 
@@ -25,8 +24,8 @@ private:
     std::chrono::milliseconds tickLength_;
     
     std::mutex eventsMutex_;
-    std::vector<GamePacket> pendingEvents_;
-    std::vector<GamePacket> curentEvents_;
+    std::vector<ClientToServerPacket> pendingEvents_;
+    std::vector<ClientToServerPacket> curentEvents_;
 
     void start(boost::asio::io_context &io_context);
 
@@ -46,6 +45,6 @@ private:
     void handleLogOut(const int playerId, const PktLogOut& pkt);
     void handleInputs(const int playerId, const PktInputs& pkt);
 
-    void safeAddEvent(const GamePacket& event);
+    void safeAddEvent(const ClientToServerPacket& event);
 
 };

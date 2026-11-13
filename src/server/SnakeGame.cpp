@@ -1,14 +1,15 @@
 #include "SnakeGame.h"
-#include "../shared/ModelServer.h"
+#include "../shared/SharedProtocol.h"
+#include "../shared/Const.h"
 
 #include <iostream>
 #include <variant>
 #include <boost/asio.hpp>
 
 SnakeGame::SnakeGame(SnakeNetwork &network, boost::asio::io_context &io_context)
-    : tickLength_(std::chrono::milliseconds(100))
+    : tickLength_(std::chrono::milliseconds(SERVER_MIN_TICK_LENGTH))
 {
-    network.on_pkt_received = [this](const GamePacket &event)
+    network.on_pkt_received = [this](const ClientToServerPacket &event)
     {
         safeAddEvent(event);
     };
@@ -93,7 +94,7 @@ void SnakeGame::collectEvents()
     pendingEvents_.clear();
 }
 
-void SnakeGame::safeAddEvent(const GamePacket &event)
+void SnakeGame::safeAddEvent(const ClientToServerPacket &event)
 {
     std::lock_guard<std::mutex> lock(eventsMutex_);
     pendingEvents_.push_back(event);
@@ -103,8 +104,6 @@ void SnakeGame::applyEvents()
 {
     for (auto &event : curentEvents_)
     {
-        event.playerId;
-
         std::visit([this, &event](const auto &pkt)
                    {
             using PktType = std::decay_t<decltype(pkt)>;
